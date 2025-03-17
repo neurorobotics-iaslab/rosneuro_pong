@@ -45,6 +45,15 @@ class PongGame:
     def move_ball(self):
         self.ball.x += self.ball_speed_x
         self.ball.y += self.ball_speed_y
+
+    def get_ball_pos(self):
+        return self.ball.x,self.ball.y
+    
+    def get_paddle_pos(self,player):
+        if player == PLAYER1:
+            return self.paddle1.y
+        elif player == PLAYER2:
+            return self.paddle2.y
         
     def launch_game(self):
         pygame.init()

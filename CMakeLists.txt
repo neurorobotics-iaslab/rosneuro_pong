@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   rosneuro_msgs
-  rosneuro_dl
 )
 
 
