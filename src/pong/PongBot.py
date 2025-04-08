@@ -1,6 +1,8 @@
 import time
 from threading import Thread
 
+from PongGame import DIR_UP,DIR_DOWN,STATE_GAMEOVER
+
 MIN_SPEED = 0 # [movements per second]
 MAX_SPEED = 32  # [movements per second]
 
@@ -15,15 +17,21 @@ class PongBot():
     def main_loop(self):
         time.sleep(2) # wait for the game to start
         while True:
+            if self.game.get_state() == STATE_GAMEOVER:
+                break
             paddley = self.game.get_paddle_pos(self.player)
             bally = self.game.get_ball_pos()[1]
             if bally > paddley:
-                self.game.move_paddle(self.player,1)
+                self.game.set_paddle_speed(self.player,DIR_UP)
             if bally < paddley:
-                self.game.move_paddle(self.player,0)
+                self.game.set_paddle_speed(self.player,DIR_DOWN)
             time.sleep(self.r)
 
     def run(self):
         print('Bot wake up!')
-        t = Thread(target=self.main_loop)
-        t.start()
+        self.t = Thread(target=self.main_loop)
+        self.t.start()
+    
+    def quit(self):
+        self.t.join()
+        print('Bot is sleeping...')

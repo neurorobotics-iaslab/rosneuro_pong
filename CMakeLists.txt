@@ -11,11 +11,25 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   rosneuro_msgs
+  message_generation
 )
 
 
-find_package(PkgConfig)
 
+## Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  Game.msg
+  Paddle.msg
+  Ball.msg
+  GameInfo.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+#   rosneuro_msgs
+)
 
 catkin_package(
 #  INCLUDE_DIRS include
