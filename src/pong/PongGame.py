@@ -6,6 +6,8 @@ import numpy as np
 
 DIR_UP = 1
 DIR_DOWN = 0
+DIR_STOP = 2
+
 PLAYER1 = 0
 PLAYER2 = 1
 WHITE = (255, 255, 255)
@@ -117,17 +119,20 @@ class PongGame:
             paddle = self.paddle1
         else:
             paddle = self.paddle2
-        if direction == 0:
+        if direction == DIR_DOWN:
             if paddle.top > 0:
                 paddle.speed = -self.PADDLE_SPEED
             else: 
                 paddle.speed = 0
-        if direction == 1:
+        if direction == DIR_UP:
             if paddle.bottom < self.HEIGHT:
                 paddle.speed = +self.PADDLE_SPEED
             else: 
                 paddle.speed = 0
 
+        if direction == DIR_STOP:
+            paddle.speed = 0
+        if player == PLAYER2: print('set paddle speed',paddle.speed)
     def move_paddles(self):
         self.paddle1.y += self.paddle1.speed
         self.paddle2.y += self.paddle2.speed
@@ -156,7 +161,7 @@ class PongGame:
             if keys[pygame.K_UP] and self.paddle2.bottom > 0:
                 self.set_paddle_speed(PLAYER2, DIR_DOWN)
             if keys[pygame.K_DOWN] and self.paddle2.top < self.HEIGHT:
-                self.set_paddle_speed(PLAYER2, DIR_UP)
+                self.set_paddle_speed(PLAYER2, DIR_UP)            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.set_state(STATE_GAMEOVER)
@@ -168,6 +173,11 @@ class PongGame:
                             self.set_state(STATE_PAUSED)
                     if event.key == pygame.K_ESCAPE:
                         self.set_state(STATE_GAMEOVER)
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_s or event.key == pygame.K_w:
+                        self.set_paddle_speed(PLAYER1, DIR_STOP)
+                    if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                        self.set_paddle_speed(PLAYER2, DIR_STOP)
 
             if self.state == STATE_NEWBALL:
                 pygame.time.wait(2000)
