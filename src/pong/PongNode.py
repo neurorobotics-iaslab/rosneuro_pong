@@ -65,9 +65,9 @@ class PongNode:
         game_info.paddle2.y = self.game.get_paddle_pos(PLAYER2)
         game_info.paddle1.speed_y = self.game.get_paddle_speed(PLAYER1)
         game_info.paddle2.speed_y = self.game.get_paddle_speed(PLAYER2)
-        game_info.game.score1,game_info.game.score2 = self.game.get_score()
         game_info.game.state = self.game.get_state()
-
+        game_info.game.score1,game_info.game.score2 = self.game.get_score()
+        game_info.game.p1_training,game_info.game.p2_training,= self.game.get_training()
         self.game_info_pub.publish(game_info)
         self.rate.sleep()
 

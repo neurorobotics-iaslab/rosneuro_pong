@@ -1,13 +1,13 @@
 import time
 from threading import Thread
 
-from PongGame import DIR_UP,DIR_DOWN,STATE_GAMEOVER
+from PongGame import PongGame,DIR_UP,DIR_DOWN,STATE_GAMEOVER
 
 MIN_SPEED = 0 # [movements per second]
 MAX_SPEED = 32  # [movements per second]
 
 class PongBot():
-    def __init__(self,game,player,speed=50):
+    def __init__(self,game:PongGame,player,speed=50):
         self.player = player
         self.game = game
         self.r = (speed)*(MAX_SPEED-MIN_SPEED)/100 + MIN_SPEED
@@ -21,10 +21,11 @@ class PongBot():
                 break
             paddley = self.game.get_paddle_pos(self.player)
             bally = self.game.get_ball_pos()[1]
+            # REMEMBER: 0 is the top of the screen
             if bally > paddley:
-                self.game.set_paddle_speed(self.player,DIR_UP)
-            if bally < paddley:
                 self.game.set_paddle_speed(self.player,DIR_DOWN)
+            if bally < paddley:
+                self.game.set_paddle_speed(self.player,DIR_UP)            
             time.sleep(self.r)
 
     def run(self):

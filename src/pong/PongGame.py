@@ -4,12 +4,12 @@ import sys
 import random
 import numpy as np
 
-DIR_UP = 1
-DIR_DOWN = 0
+DIR_UP = 0
+DIR_DOWN = 1
 DIR_STOP = 2
 
-PLAYER1 = 0
-PLAYER2 = 1
+PLAYER1 = 1
+PLAYER2 = 2
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)        
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -17,13 +17,19 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 PADDLE_WIDTH,PADDLE_HEIGHT = 10, 100
 PADDLE_SPEED = 5
 BALL_SIZE = 20
-BALL_SPEED_X, BALL_SPEED_Y = 5, 5
-BALL_SPEED = 5
+BALL_SPEED_X, BALL_SPEED_Y = 2, 5
 
 STATE_PAUSED = 0
 STATE_NEWBALL = 1
 STATE_RUNNING = 2
 STATE_GAMEOVER = 3
+
+TRAINING_OFF = 0
+TRAINING_ON = 1
+
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
+GRAY =  (128, 128, 128)
 
 class Paddle(pygame.Rect):
     def __init__(self, *args, **kwargs):
@@ -53,6 +59,8 @@ class PongGame:
         self.paddle2 = Paddle(self.WIDTH - 20, (self.HEIGHT - self.PADDLE_HEIGHT) // 2, PADDLE_WIDTH, PADDLE_HEIGHT)
 
         self.ball = Ball(self.WIDTH // 2 - self.BALL_SIZE // 2, self.HEIGHT // 2 - self.BALL_SIZE // 2, self.BALL_SIZE, self.BALL_SIZE)
+        self.p1_training = False
+        self.p2_training = False
 
     def move_ball(self):
         self.ball.x += self.ball.speed_x
@@ -100,11 +108,11 @@ class PongGame:
             self.ball.speed_x = -self.ball.speed_x
             # detect collision point
             if self.ball.colliderect(self.paddle1):
-                self.ball.speed_y = -2 * (self.paddle1.centery - self.ball.centery)/self.PADDLE_HEIGHT *  BALL_SPEED
+                self.ball.speed_y = -2 * (self.paddle1.centery - self.ball.centery)/self.PADDLE_HEIGHT *  BALL_SPEED_Y
             elif self.ball.colliderect(self.paddle2):
-                self.ball.speed_y = -2 * (self.paddle2.centery - self.ball.centery)/self.PADDLE_HEIGHT * BALL_SPEED
+                self.ball.speed_y = -2 * (self.paddle2.centery - self.ball.centery)/self.PADDLE_HEIGHT * BALL_SPEED_Y
             else:
-                self.ball.speed_y = np.sign(self.ball.speed_y) * BALL_SPEED
+                self.ball.speed_y = np.sign(self.ball.speed_y) * BALL_SPEED_Y
         if self.ball.left <= 0:
             self.score2 += 1
             self.reset_ball()
@@ -115,34 +123,50 @@ class PongGame:
             self.set_state(STATE_NEWBALL)
 
     def set_paddle_speed(self, player, direction):
-        if player == 0:
+        if player == PLAYER1:
             paddle = self.paddle1
-        else:
+        elif player == PLAYER2:
             paddle = self.paddle2
-        if direction == DIR_DOWN:
+
+        if direction == DIR_UP:
             if paddle.top > 0:
                 paddle.speed = -self.PADDLE_SPEED
             else: 
                 paddle.speed = 0
-        if direction == DIR_UP:
+        if direction == DIR_DOWN:
             if paddle.bottom < self.HEIGHT:
                 paddle.speed = +self.PADDLE_SPEED
             else: 
                 paddle.speed = 0
-
+        
         if direction == DIR_STOP:
             paddle.speed = 0
-        if player == PLAYER2: print('set paddle speed',paddle.speed)
+
     def move_paddles(self):
         self.paddle1.y += self.paddle1.speed
         self.paddle2.y += self.paddle2.speed
 
+    def get_training(self):
+        return int(self.p1_training), int(self.p2_training)
+        
     def draw(self):
         self.screen.fill(BLACK)
+        # Field, Paddles and Ball
+        pygame.draw.aaline(self.screen, WHITE, (self.WIDTH // 2, 0), (self.WIDTH // 2, self.HEIGHT))
         pygame.draw.rect(self.screen, WHITE, self.paddle1)
         pygame.draw.rect(self.screen, WHITE, self.paddle2)
         pygame.draw.ellipse(self.screen, WHITE, self.ball)
-        pygame.draw.aaline(self.screen, WHITE, (self.WIDTH // 2, 0), (self.WIDTH // 2, self.HEIGHT))
+
+        border_color = GRAY
+        c1_center = (self.WIDTH // 2 -30, 40)
+        c2_center = (self.WIDTH // 2 +30, 40)
+        pygame.draw.circle(self.screen, border_color, c1_center, 8)  # Border
+        pygame.draw.circle(self.screen, GREEN if self.p1_training else BLACK, c1_center, 6)  # Inner circle
+
+        pygame.draw.circle(self.screen, border_color, c2_center, 8)  # Border
+        pygame.draw.circle(self.screen, GREEN if self.p2_training else BLACK, c2_center, 6)  # Inner circle
+        
+        # Score
         score_text1 = self.font.render(str(self.score1), True, WHITE)
         score_text2 = self.font.render(str(self.score2), True, WHITE)
         self.screen.blit(score_text1, (self.WIDTH // 4, 20))
@@ -155,13 +179,13 @@ class PongGame:
         while True: 
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w] and self.paddle1.bottom > 0:
-                self.set_paddle_speed(PLAYER1, DIR_DOWN)
-            if keys[pygame.K_s] and self.paddle1.top < self.HEIGHT:
                 self.set_paddle_speed(PLAYER1, DIR_UP)
+            if keys[pygame.K_s] and self.paddle1.top < self.HEIGHT:
+                self.set_paddle_speed(PLAYER1, DIR_DOWN)
             if keys[pygame.K_UP] and self.paddle2.bottom > 0:
-                self.set_paddle_speed(PLAYER2, DIR_DOWN)
+                self.set_paddle_speed(PLAYER2, DIR_UP)
             if keys[pygame.K_DOWN] and self.paddle2.top < self.HEIGHT:
-                self.set_paddle_speed(PLAYER2, DIR_UP)            
+                self.set_paddle_speed(PLAYER2, DIR_DOWN)            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.set_state(STATE_GAMEOVER)
@@ -173,6 +197,16 @@ class PongGame:
                             self.set_state(STATE_PAUSED)
                     if event.key == pygame.K_ESCAPE:
                         self.set_state(STATE_GAMEOVER)
+                    if event.key == pygame.K_r:
+                        self.reset_ball()
+                        self.draw()
+                        pygame.display.flip()
+                        self.set_state(STATE_NEWBALL)
+                    if event.key == pygame.K_t:
+                        self.p1_training = not self.p1_training
+                    if event.key == pygame.K_y:
+                        self.p2_training = not self.p2_training
+
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_s or event.key == pygame.K_w:
                         self.set_paddle_speed(PLAYER1, DIR_STOP)
