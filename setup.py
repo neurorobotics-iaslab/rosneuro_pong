@@ -3,7 +3,7 @@ from catkin_pkg.python_setup import generate_distutils_setup
 
 # Fetch values from package.xml
 setup_args = generate_distutils_setup(
-    packages=['pong'],
+    packages=['rosneuro_pong'],
     package_dir={'': 'src'}
 )
 
