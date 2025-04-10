@@ -4,13 +4,12 @@ import rospy
 from rosneuro_msgs.msg import NeuroEvent,NeuroOutput
 import numpy as np
 
-from PongGame import PongGame, PLAYER1, PLAYER2
+from PongGame import PongGame
+from constants import PLAYER1, PLAYER2
 from PongBot import PongBot
 
 from rosneuro_pong.msg import GameInfo
 from threading import Thread
-
-import sys
 
 class PongNode:
     def __init__(self):
